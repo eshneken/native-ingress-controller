@@ -1,0 +1,28 @@
+apiVersion: "ingress.oraclecloud.com/v1beta1"
+kind: IngressClassParameters
+metadata:
+  name: native-ingress-class-paramters
+  namespace: native-ingress-controller-system
+spec:
+  compartmentId: "COMPARTMENT_OCID"
+  subnetId: "LBAAS_SUBNET_OCID"
+  loadBalancerName: "native-ic-lb"
+  isPrivate: false
+  maxBandwidthMbps: 8000
+  minBandwidthMbps: 100
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: native-ingress-class
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: oci.oraclecloud.com/native-ingress-controller
+  parameters:
+    scope: Namespace
+    namespace: native-ingress-controller-system
+    apiGroup: ingress.oraclecloud.com
+    kind: ingressclassparameters
+    name: native-ingress-class-paramters
+

@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events { }
+    http {
+      server {
+        listen 80;
+        
+        # Serve static content from /
+        location / {
+          alias /usr/share/nginx/html/default/;
+          autoindex on;
+        }
+
+        # Serve static content from /path1/
+        location /path1/ {
+          alias /usr/share/nginx/html/path1/;
+          autoindex on;
+        }
+
+        # Serve static content from /path2
+        location /path2/ {
+          alias /usr/share/nginx/html/path2/;
+          autoindex on;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: static-content-path1
+data:
+  index.html: |
+    <html>
+    <head><title>Path 1 Content</title></head>
+    <body>
+      <h1>You've requested /path1 on my OKE nginx</h1>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: static-content-path2
+data:
+  index.html: |
+    <html>
+    <head><title>Path 2 Content</title></head>
+    <body>
+      <h1>You've requested /path2 on my OKE nginx</h1>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: static-content-default
+data:
+  index.html: |
+    <html>
+    <head><title>Default Content</title></head>
+    <body>
+      <h1>OKE nginx default page</h1>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: path1-content
+          mountPath: /usr/share/nginx/html/path1
+        - name: path2-content
+          mountPath: /usr/share/nginx/html/path2
+        - name: default-content
+          mountPath: /usr/share/nginx/html/default
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+      - name: path1-content
+        configMap:
+          name: static-content-path1
+      - name: path2-content
+        configMap:
+          name: static-content-path2
+      - name: default-content
+        configMap:
+          name: static-content-default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: nginx

@@ -1,0 +1,50 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: native-ingress-class
+spec:
+  ingressClassName: native-ingress-class
+  defaultBackend:
+    service:
+      name: nginx-service
+      port:
+        number: 80
+  rules:
+    - http:
+        paths:
+          - pathType: Exact
+            path: "/echo1"
+            backend:
+              service:
+                name: echoserver-service
+                port:
+                  number: 80
+          - pathType: Exact
+            path: "/echo2"
+            backend:
+              service:
+                name: echoserver-service
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: "/path1"
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: "/path2"
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+          - pathType: Exact
+            path: "/burn_cpu"
+            backend:
+              service:
+                name: burn-cpu-service
+                port:
+                  number: 80

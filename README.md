@@ -36,7 +36,7 @@ Allow any-user to read cluster-family in compartment sandbox where all {request.
 4. Enable NativeIngressController Add-On from OKE Cluster Details in OCI Console
     1. Fill in **COMPARTMENT_OCID** in UI for comparmentid
     1. Fill in **LBAAS_SUBNET_OCID** in UI for loadBalancerSubnetid
-    1. Add a key named authType with value WorkloadIdentity
+    1. Add a key named **authType** with value WorkloadIdentity
 
 5. Update security lists for VCN created during step 1
     1. Add ingress rule to *LB seclist* for 0.0.0.0/0 to route to ports 80, 443

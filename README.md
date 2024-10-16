@@ -12,7 +12,7 @@ This repository has steps to:
 
 1. Create OKE cluster via OCI Console wizard (creates VCN, node pools, etc).  Make sure to use AMD E5 compute shapes since subsequent instructions assume cross-compilation for AMD.
 
-2. Create policy for native ingress controller at the compartment level while replacing CLUSTER_OCID in statements with OCID of previously create cluster
+2. Create policy for native ingress controller at the compartment level while replacing **CLUSTER_OCID** in statements with OCID of previously create cluster
 
 ```
 Allow any-user to manage load-balancers in compartment sandbox where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = 'CLUSTER_OCID'}
@@ -34,9 +34,9 @@ Allow any-user to read cluster-family in compartment sandbox where all {request.
 3. Enable Certificate Manager Add-On from OKE Cluster Details in OCI Console
 
 4. Enable NativeIngressController Add-On from OKE Cluster Details in OCI Console
-    1. Fill in COMPARTMENT_OCID in UI for comparmentid
-    1. Fill in LBAAS_SUBNET_OCID in UI for loadBalancerSubnetid
-    1. Add a key named authType with value WorkoadIdentity
+    1. Fill in **COMPARTMENT_OCID** in UI for comparmentid
+    1. Fill in **LBAAS_SUBNET_OCID** in UI for loadBalancerSubnetid
+    1. Add a key named authType with value WorkloadIdentity
 
 5. Update security lists for VCN created during step 1
     1. Add ingress rule to *LB seclist* for 0.0.0.0/0 to route to ports 80, 443
@@ -44,23 +44,23 @@ Allow any-user to read cluster-family in compartment sandbox where all {request.
     1. Add ingress rule to *node/pod seclist* to route all ports, all protocols from LB subnet CIDR
 
 ## Compile, dockerize, and push burn-cpu service
-Included here is burn-cpu which is a small Flask app to simulate load on k8s cluster.  The code is found in python/burn-cpu.py and every time the GET endpoint is invoked the service will spin in a tight loop for a random number of seconds between 0 and 2.
+Included here is burn-cpu which is a small Flask app to simulate load on k8s cluster.  The code is found in **python/burn-cpu.py** and every time the GET endpoint is invoked the service will spin in a tight loop for a random number of seconds between 0 and 2.
 
-1. Create a python virtual environment by running: python3 -m venv .venv
+1. Create a python virtual environment by running: **python3 -m venv .venv**
 
-2. Activate the virtual environment: source ./.venv/bin/activate
+2. Activate the virtual environment: **source ./.venv/bin/activate**
 
-3. Install all the Python requirements:  pip install -r python/requirements.txt
+3. Install all the Python requirements:  **pip install -r python/requirements.txt**
 
 4. Navigate to the python sub-directory and init your local docker runtime (i.e. rancher desktop)
 
-5. Build an image locally:  docker build -t burn-cpu . --platform linux/amd64
+5. Build an image locally:  **docker build -t burn-cpu . --platform linux/amd64**
 
 6. Log into OCIR:  
 ```
 docker login docker login ocir.us-ashburn-1.oci.oraclecloud.com -u USERNAME -p AUTH_TOKEN 
 ```
-where USERNAME is your object storage namespace (found under Tenancy Details in the OCI Console) followed by a slash followed by your IAM username.  For example:
+where *USERNAME* is your object storage namespace (found under Tenancy Details in the OCI Console) followed by a slash followed by your IAM username.  For example:
 ```
 docker login docker login ocir.us-ashburn-1.oci.oraclecloud.com -u idxhcvzolqr/first.last@oracle.com -p BFWq23a.dst2woWv_-UB
 ```
@@ -69,7 +69,7 @@ docker login docker login ocir.us-ashburn-1.oci.oraclecloud.com -u idxhcvzolqr/f
 ```
 docker tag burn-cpu ocir.us-ashburn-1.oci.oraclecloud.com/NAMESPACE/public/burn-cpu:1.0
 ```
-where NAMESPACE is your object storage namespace (found under Tenancy Details in the OCI Console)  For example:
+where **NAMESPACE** is your object storage namespace (found under Tenancy Details in the OCI Console)  For example:
 ```
 docker tag burn-cpu ocir.us-ashburn-1.oci.oraclecloud.com/idxhcvzolqr/public/burn-cpu:1.0
 ```
@@ -78,36 +78,36 @@ docker tag burn-cpu ocir.us-ashburn-1.oci.oraclecloud.com/idxhcvzolqr/public/bur
 ```
 docker push ocir.us-ashburn-1.oci.oraclecloud.com/NAMESPACE/public/burn-cpu:1.0
 ```
-where NAMESPACE is your object storage namespace (found under Tenancy Details in the OCI Console)  For example:
+where **NAMESPACE** is your object storage namespace (found under Tenancy Details in the OCI Console)  For example:
 ```
 docker push ocir.us-ashburn-1.oci.oraclecloud.com/idxhcvzolqr/public/burn-cpu:1.0
 ```
 
 9. Check the Container Registry section in the OCI Console in the root compartment to see that public/burn-cpu repo and image have been created.
 
-10. For simplicity, change the visibility of the repo to 'Public'.  Otherwise, you will need to configure imagePullSecrets in the yamls of the following section.
+10. For simplicity, change the visibility of the repo to 'Public'.  Otherwise, you will need to configure *imagePullSecrets* in the yamls of the following section.
 
 ## Deploy Native Ingress Controller to OKE Cluster
 In previous steps you've configured the OCI Native Ingress Controller as an Add-On.  Now you need to create an instance of the Ingress with a LBaaS facing the Internet.
 
 1. Open 1-ingress-controller-defs.yaml and 
-    1. Replace COMPARTMENT_OCID with the OCID of the compartment your cluster is in
-    1. Replace LBAAS_SUBNET_OCID with the OCID of the LB subnet in your cluster's VCN
+    1. Replace **COMPARTMENT_OCID** with the OCID of the compartment your cluster is in
+    1. Replace **LBAAS_SUBNET_OCID** with the OCID of the LB subnet in your cluster's VCN
 
-2. kubectl apply -f 1-ingress-controller-defs.yaml
+2. Execute: **kubectl apply -f 1-ingress-controller-defs.yaml**
 
 ## Deploy some workloads and expose them to the Ingress Controller
 In this stage we deploy a number of k8s deployments which can act as backend targets for the Ingress Controller.  
 
-1. Deploy an echoserver:  kubectl apply -f 2-echoserver.yaml
+1. Deploy an echoserver:  **kubectl apply -f 2-echoserver.yaml**
 
-8. Deploy NGINX: kubectl apply -f 3-nginx.yaml
+8. Deploy NGINX: **kubectl apply -f 3-nginx.yaml**
 
 9. Deploy the burn-cpu service previously pushed into OCIR.  This will burn CPU cycles for random timeframes between 0 and 2 seconds and generate load on the OKE cluster to help demonstrate LBaaS and OKE metrics.  
-    1. Open 4-burn_cpu.yaml and replace OBJECT_STORAGE_NAMESPACE with your object storage namespace.
-    1. kubectl apply -f 4-burn_cpu.yaml
+    1. Open **4-burn_cpu.yaml** and replace **OBJECT_STORAGE_NAMESPACE** with your object storage namespace.
+    1. Run: **kubectl apply -f 4-burn_cpu.yaml**
 
-10. Register all the services just deployed with the Ingress Controller: kubectl apply -f 5-ingress.yaml
+10. Register all the services just deployed with the Ingress Controller: **kubectl apply -f 5-ingress.yaml**
 
 11. Verify everything looks good by executing: kubectl describe ingress native-ingress-class.  Your output should look something like:
 ```
@@ -133,11 +133,11 @@ Events:       <none>
 ## Test the ingress locally
 Start by testing the ingress controller and all of the endpoints locally.  You want to make sure that you've followed previous steps which included creating & activating a Python virtual environment and installing all the pip requirements.
 
-1. Edit python/client.py and update the lb_base variable with the public Address returned in the previous step where you kubectl described the ingress
+1. Edit **python/client.py** and update the **lb_base variable** with the public Address returned in the previous step where you kubectl described the ingress
 
 2. You may choose to disable or enable the various endpoints to test in the endpoints array
 
-3. Execute: python3 client.py
+3. Execute: **python3 client.py**
 
 4. Verify that you're getting HHTP return codes of 200 for all the calls
 
@@ -157,7 +157,7 @@ Called http://129.159.210.69/burn_cpu, Status Code: 200, Time: 1983.22 ms
 ## Load test the ingress in OCI
 You've tested locally, but there are only so many concurrent threads you'll be able to run from your local machine and so much network throughput you can drive from a single client.  To more fully load test the LBaaS, ingress, and backends you will want to spin up an instance pool in OCI that runs the client in parallel from multiple VMs.
 
-1. Create a public OCI bucket called "public-bucket" and upload python/client.py into the bucket.  This will allow the curl command on line 4 of cloud-init.sh to pull down the client into each new instance (once the OBJECT_STORAGE_NAMESPACE is properly replaed with your object storage namespace)
+1. Create a public OCI bucket called **public-bucket** and upload **python/client.py** into the bucket.  This will allow the curl command on line 4 of **cloud-init.sh** to pull down the client into each new instance (once the **OBJECT_STORAGE_NAMESPACE** is properly replaed with your object storage namespace)
 
 2. Create an OCI compute instance with the following parameters:
     1. VM.Standard.A1.Flex
@@ -166,7 +166,7 @@ You've tested locally, but there are only so many concurrent threads you'll be a
     1: OS: Oracle Linux 8
     1: VCN/Subnet:  OKE Cluster VCN and LB subnet (the one which is public and has internet gateway access)
     1. Make sure you upload your private SSH key to allow access
-    1. Expand advanced options and paste the contents of cloud-init.sh into the section for cloud-init.  Make sure to replace OBJECT_STORAGE_NAMESPACE with your object storage namespace.
+    1. Expand advanced options and paste the contents of **cloud-init.sh** into the section for cloud-init.  Make sure to replace **OBJECT_STORAGE_NAMESPACE** with your object storage namespace.
 
 3.  To verify everything worked SSH into the compute instance and look at the contents of output.txt to make sure it matches the expected local testing output from the last step.
 
@@ -182,8 +182,9 @@ We want to be able to monitor how long each backend takes to return from the per
 1. In the OCI Console, navigate to the load balancer instance created by your ingress setup.  Click on the Logs link in the left sidebar and enable access logging.  Create a new logging group when prompted and call it lbaas_logs.
 
 2. Navigate to Identity -> Policies and create a policy called logging-analytics-policy in the root compartment  This policy should have the following statement:
-    1. allow service loganalytics to READ loganalytics-features-family in tenancy	
-
+```
+allow service loganalytics to READ loganalytics-features-family in tenancy	
+```
 3. Enable OCI Logging Analytics by following [this guide](https://docs.oracle.com/en/cloud/paas/logging-analytics/logqs/#before_you_begin).  When given the option, make sure to select audit log collection and include subcompartments.  You should see options for enabling log collection and to include the logging group (lbaas_logs) you previously created.
 
 4. You always have the ability to add more sources later by navigating to Logging Analytics -> Administration -> Add Data in the OCI Console.

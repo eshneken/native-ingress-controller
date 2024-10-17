@@ -8,6 +8,8 @@ This repository has steps to:
 * Create a Logging Analytics Query to look at backend connect time
 * Exercise the Native Ingress Controller via a client tester (whether locally or through an OCI Instance Pool) to generate load and metrics to review in the OCI Console
 
+A [Getting Started Guide](https://github.com/oracle/oci-native-ingress-controller/blob/main/GettingStarted.md) for the OCI Native Ingress Controller was used as a starting point.
+
 ## Create Cluster with Native Ingress Controller
 
 1. Create OKE cluster via OCI Console wizard (creates VCN, node pools, etc).  Make sure to use AMD E5 compute shapes since subsequent instructions assume cross-compilation for AMD.
